@@ -1,4 +1,7 @@
 # RayTracingGoTest
+
+![image presentation](https://github.com/AureClai/RayTracingGoTest/blob/master/img/cornelBall.png)
+
 Testing Golang implementation of C++ RayTracing Engine from 
 <https://github.com/RayTracing/raytracing.github.io>
 
