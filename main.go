@@ -11,6 +11,14 @@ import (
 	"./view"
 )
 
+/*
+	WIDTH is the number of pixel on the X-Axis > 200 recommended
+	HEIGHT is the number of pixels on the Y-Axis > 200 recommended
+	SAMPLES is the number of random rays used to estimate the color of one pixel :
+		- > 10 for first test
+		- > 100 for pretty good render
+		- > 1000 for very good render - VERY lONG
+*/
 // WIDTH unexported
 const WIDTH int = 400
 
@@ -19,6 +27,30 @@ const HEIGHT int = 400
 
 // SAMPLES unexported
 const SAMPLES int = 100
+
+// WALL COLORS (float64 beetween 0.0 and 1.0)
+// initial red(0.65,0.05,0.5) for left and green(0.12,0.45,0.15) for right
+// Left Wall
+const LeftWallR float64 = 0.65
+const LeftWallG float64 = 0.05
+const LeftWallB float64 = 0.05
+
+//Right Wall
+const RightWallR float64 = 0.45
+const RightWallG float64 = 0.45
+const RightWallB float64 = 0.45
+
+func checkColors() {
+	if LeftWallR > 1 || LeftWallR < 0 ||
+		LeftWallG > 1 || LeftWallG < 0 ||
+		LeftWallB > 1 || LeftWallB < 0 ||
+		RightWallR > 1 || RightWallR < 0 ||
+		RightWallG > 1 || RightWallG < 0 ||
+		RightWallB > 1 || RightWallB < 0 {
+		panic("Invalid colors for walls")
+	}
+
+}
 
 func drand48() float64 {
 	return rand.Float64()
@@ -62,12 +94,12 @@ func color(r *geom.Ray, world geom.Hitable, lightShape geom.Hitable, depth int) 
 
 func MakecornellBoxObjects() *geom.HitableList {
 	list := make([]geom.Hitable, 50)
-	red := geom.Lambertian{geom.NewConstantTexture(geom.NewVec3(0.65, 0.05, 0.05))}
+	leftWall := geom.Lambertian{geom.NewConstantTexture(geom.NewVec3(LeftWallR, LeftWallG, LeftWallB))}
 	white := geom.Lambertian{geom.NewConstantTexture(geom.NewVec3(0.73, 0.73, 0.73))}
-	green := geom.Lambertian{geom.NewConstantTexture(geom.NewVec3(0.12, 0.45, 0.15))}
+	rightWall := geom.Lambertian{geom.NewConstantTexture(geom.NewVec3(RightWallR, RightWallG, RightWallB))}
 	light := geom.DiffuseLight{Emit: geom.NewConstantTexture(geom.NewVec3(15, 15, 15))}
-	list[0] = geom.NewFlipNormals(geom.NewYZRect(0, 555, 0, 555, 555, green))
-	list[1] = geom.NewYZRect(0, 555, 0, 555, 0, red)
+	list[0] = geom.NewFlipNormals(geom.NewYZRect(0, 555, 0, 555, 555, rightWall))
+	list[1] = geom.NewYZRect(0, 555, 0, 555, 0, leftWall)
 	list[2] = geom.NewFlipNormals(geom.NewXZRect(213, 343, 227, 332, 554, light))
 	list[3] = geom.NewFlipNormals(geom.NewXZRect(0, 555, 0, 555, 555, white))
 	list[4] = geom.NewXZRect(0, 555, 0, 555, 0, white)
@@ -131,11 +163,12 @@ func deNan(v *geom.Vec3) *geom.Vec3 {
 }
 
 func main() {
+	checkColors()
 	// time management
 	start := time.Now()
 	percentage := 0.0
 
-	f, err := os.Create("test3.ppm")
+	f, err := os.Create("outputImage.ppm")
 	if err != nil {
 		fmt.Println(err)
 		return
